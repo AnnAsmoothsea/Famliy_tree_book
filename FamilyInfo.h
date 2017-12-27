@@ -14,6 +14,16 @@ class FamilyInfo
 public:
 	FamilyInfo();
 	virtual ~FamilyInfo();
+	FamilyInfo operator =(FamilyInfo &p)
+	{
+		
+		familyNumber=p.familyNumber;
+		wNumber=p.wNumber;
+		maxAge=p.maxAge;
+		maxAge=p.maxAge;
+		minAge=p.minAge;
+		return *this;
+	}
 	void PrinInfo();//显示信息
 	int familyNumber;//家庭总人数
 	int wNumber;//女性数量

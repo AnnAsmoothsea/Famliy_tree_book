@@ -119,6 +119,10 @@ SOURCE=.\TreeDefined.h
 
 SOURCE=.\TreeFunction.h
 # End Source File
+# Begin Source File
+
+SOURCE=.\TreeLoad.h
+# End Source File
 # End Group
 # Begin Group "Resource Files"
 

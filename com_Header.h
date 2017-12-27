@@ -1,4 +1,5 @@
 #include<iostream>
+#include <windows.h>
 #include<malloc.h>
 #include<process.h>
 #include<string.h>

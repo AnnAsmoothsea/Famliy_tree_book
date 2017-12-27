@@ -23,6 +23,7 @@ public:
     char name[50];//姓名
 	char birthPlace[100];//出生地址
 	char sex;//性别
+	int mark;//标记
 	int age;//年龄
 	int birthYear;
 	int birthMonth;

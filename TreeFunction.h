@@ -133,6 +133,7 @@ status InitFamily(Family &T)																//º¯ÊıÒ»£º³õÊ¼»¯×æÏÈ¼°¼Ò×åĞÅÏ¢
 
 	T.ancestor->level = 0;						//¸ù½Úµã²ã´ÎÎª0
 	T.ancestor->childNum = 0;					//º¢×ÓÊıÁ¿Îª0
+	T.ancestor->memberInfo.mark=T.ancestor->level+1;
 
     /*********Ö¸ÕëÓò³õÊ¼»¯**********/
 	T.ancestor->parent = NULL;		//½«×æÏÈµÄ¸¸½ÚµãÖÃ¿Õ
@@ -251,6 +252,7 @@ status InitMember(Member &m,Family &T)					     									//º¯Êı¶ş£º³õÊ¼»¯¼Ò×å³ÉÔ
 status InsertMember(Family &T,Member &pMember,Member m)											//º¯ÊıÈı£º²åÈë¼Ò×å³ÉÔ±
 {
 	pMember->child[pMember->childNum] = m;  //½«³ÉÔ±½Úµã²åÔÚµÚi¸öº¢×ÓºóÃæ
+	m->memberInfo.mark=pMember->childNum+1; //
 	m->level = pMember->level+1;			//¸Ã³ÉÔ±²ã´ÎµÈÓÚ¸¸½Úµã²ã´Î+1
 	m->parent = pMember;                    //½«º¢×Ó½ÚµãµÄ¸¸Ö¸ÕëÖ¸Ïò¸¸½Úµã
 	T.familyInfo.familyNumber ++;			//¼ÒÍ¥×ÜÈËÊı+1
@@ -305,6 +307,24 @@ void PrintSpace(int n)  //´òÓ¡¿Õ¸ñ
 	while(a--)			//Ñ­»·
 		putchar(' ');   //Êä³ö¿Õ¸ñ
 }
+void Showorder(Member t)
+{
+	int i;
+	int Stack[10];
+	int top,base;
+	top=base=0;
+	Stack[top++]=t->memberInfo.mark;
+	while(t->parent!=NULL)
+	{
+		Stack[top++]=t->parent->memberInfo.mark;
+		t=t->parent;
+	}
+	for(i=top;i>0;i--)
+	{
+		cout<<Stack[i-1]<<"-";
+	}
+	return;
+}
 void ShowMember(Member t)																		//º¯ÊıÎå£ºÏÔÊ¾ËùÓĞ¼Ò×å³ÉÔ±
 {
 	if(t==NULL)
@@ -314,8 +334,9 @@ void ShowMember(Member t)																		//º¯ÊıÎå£ºÏÔÊ¾ËùÓĞ¼Ò×å³ÉÔ±
 		int i;
 		putchar('*');
 		PrintSpace(8*t->level);
-		cout<<t->memberInfo.name;//Êä³öĞÕÃû
-		if(t->couple != NULL) cout<<"--wife:"<<t->couple->memberInfo.name; //Èô´æÔÚÅäÅ¼£¬Ğ´Êä³öÅäÅ¼ĞÕÃû
+		Showorder(t);
+		cout<<":"<<t->memberInfo.name;//Êä³öĞÕÃû
+		//if(t->couple != NULL) cout<<"--wife:"<<t->couple->memberInfo.name; //Èô´æÔÚÅäÅ¼£¬Ğ´Êä³öÅäÅ¼ĞÕÃû
 		cout<<endl;
 		for(i = 0; i<t->childNum ; i++)  //Êä³öº¢×Ó½ÚµãĞÅÏ¢
 			ShowMember(t->child[i]);
@@ -328,6 +349,7 @@ void ShowFamilyInfo(Family T)																	//º¯ÊıÁù£ºÏÔÊ¾¼ÒÍ¥ÈËÔ±ĞÅÏ¢
 	cout<<"                    ManNumber: "<<T.familyInfo.mNumber<<endl;		  //Êä³ö¼ÒÍ¥ÄĞĞÔÊıÁ¿
 	cout<<"                    WomanNumber: "<<T.familyInfo.wNumber<<endl;		  //Êä³ö¼ÒÍ¥Å®ĞÔÊıÁ¿	
 }
+
 
 Member SearchFamily(Member t,char key[])														//º¯ÊıÆß£º¸ù¾İ¹Ø¼ü×Ö²éÕÒ³ÉÔ±½Úµã£¨Ò»°ãÎªÃû×Ö£©
 {
@@ -365,6 +387,8 @@ void SaveFamilyFile(Family T)																	  //º¯Êı°Ë£º½«½Úµã±£´æÔÚÎÄ¼şÀï
 		cout<<"false"<<endl;
 		return ;
 	}//ÒÔ¶ÁĞ´·½Ê½´ò¿ªÎÄ¼ş
+	fwrite(&T.familyInfo,sizeof(FamilyInfo),1,fp);////////////
+
 	fwrite(T.ancestor,sizeof(MemberNode),1,fp);
 	front =rear=0;
 	queue[rear++]=T.ancestor;
@@ -385,6 +409,7 @@ void ReadFamily(Family &T)
 {
 	Member head,root;
 	Member queue[20];
+	FamilyInfo *x;
 	int i,front,rear;//´´½¨Ò»¸ö¶ÓÁĞ
 	FILE *fp;
 	fp=fopen("Information.txt", "r");
@@ -393,6 +418,15 @@ void ReadFamily(Family &T)
 		cout<<"false"<<endl;
 		return ;
 	}//ÒÔ¶Á·½Ê½´ò¿ªÎÄ¼ş
+	x=(FamilyInfo*)malloc(sizeof(FamilyInfo));///////////
+	fread(x,sizeof(FamilyInfo),1,fp);
+	T.familyInfo.familyNumber=x->familyNumber;
+	T.familyInfo.mNumber=x->mNumber;
+	T.familyInfo.wNumber=x->wNumber;
+	T.familyInfo.maxAge=x->maxAge;
+	T.familyInfo.minAge=x->minAge;
+
+
 	root=(Member)malloc(sizeof(MemberNode));
 
 	fread(root,sizeof(MemberNode),1,fp);
@@ -419,6 +453,7 @@ void ReadFamily(Family &T)
 			}
 		}
 	}
+	root->parent=NULL;
 	T.ancestor=root;
 	fclose(fp);
 	fp=NULL;
@@ -427,18 +462,27 @@ void ReadFamily(Family &T)
 
 void ResetMemberInfo(Member &m,char name[])  //ÖØÔØ1£ºĞŞ¸Ä³ÉÔ±Ãû×Ö
 {
+	strcpy(m->memberInfo.name,name);
 }
 void ResetMemberInfo(Member &m,int year,int month,int day)  //ÖØÔØ2£ºĞŞ¸Ä³ÉÔ±ËÀÍöÈÕÆÚ
 {
+	m->memberInfo.birthYear=year;
+	m->memberInfo.birthMonth=month;
+	m->memberInfo.birthDay=day;
+	return ;
 }
 void ResetMemberInfo(Member &m)  //ÖØÔØ1£ºĞŞ¸Ä³ÉÔ±ÅäÅ¼ĞÅÏ¢Ö±½ÓÔÚÀïÃæ²Ù×÷
 {
+	char newbirthplace[20];
+	cout<<"Please input the Member's new birthPlace"<<endl;
+	cin>>newbirthplace;
+	strcpy(m->memberInfo.birthPlace,newbirthplace);
 }
 int Function(Family &T,int x)
 {
 	Member m = NULL;
 	Member pMember = NULL,searchMember = NULL;				//¶¨Òå²éÑ¯¸¸Ö¸ÕëºÍ²éÕÒÖ¸Õë
-	char searchName[50] = "";					//¶¨Òå²éÕÒĞÕÃûÊı×é
+	char searchName[50] = "";//¶¨Òå²éÕÒĞÕÃûÊı×é
 
 	switch(x)
 	{
@@ -543,11 +587,11 @@ int Function(Family &T,int x)
 			cout<<"                    Search successful!"<<endl<<endl;
 			cout<<"   --------------------Member information--------------------"<<endl;
 			searchMember->memberInfo.PrintInfo();			//Êä³ö²éÕÒµ½½ÚµãµÄÏêÏ¸ĞÅÏ¢     
-			if(searchMember->couple != NULL)				//ÈôÓĞÆŞÊÒ
+			/*if(searchMember->couple != NULL)				//ÈôÓĞÆŞÊÒ
 			{
 				cout<<"   --------------------wife's information--------------------"<<endl;	//Êä³öÌáÊ¾ĞÅÏ¢				
 				searchMember->couple->memberInfo.PrintInfo();//Êä³öÆŞ×ÓµÄĞÅÏ¢
-			}
+			}*/
 			cout<<endl;									   	 //»»ĞĞ
 		}	
 		return 1;
@@ -558,6 +602,47 @@ int Function(Family &T,int x)
 			cout<<"                --------------------This is a empty tree!!!-----------------------"<<endl;
 			return 1;
 		}
+		cout<<"                    Please input the position you want to Reset(the memberName)->"<<endl;
+		cin>>searchName;							//ÊäÈë²éÕÒĞÕÃû
+
+		searchMember = SearchFamily(T.ancestor,searchName); //ÔÚÊ÷ÖĞ²éÕÒĞÕÃû
+
+		if(searchMember == NULL)							//Èô²éÕÒÊ§°Ü
+		{
+			cout<<"                    The member is no exit!"<<endl<<endl;					//Êä³öÌáÊ¾ĞÅÏ¢
+		}
+		cout<<     "1.Resert Member's name"<<endl;
+		cout<<     "2.Resert Member's birthdata"<<endl;
+		cout<<     "3.Resert Member's birthplace"<<endl;
+		cout<<     "Please input your chioce"<<endl;
+		int y;
+		cin>>y;
+		switch(y)
+		{
+		case 1:
+			char newname[20];
+			cout<<"Please input the Member's new name"<<endl;
+			cin>>newname;
+			ResetMemberInfo(searchMember,newname);
+			return 1;
+		case 2:
+			int a,b,c;
+			cout<<"Please input the Member's new birthdata"<<endl;
+			cin>>a;
+			cin>>b;
+			cin>>c;
+			ResetMemberInfo(searchMember,a,b,c);
+			return 1;
+		case 3:
+			ResetMemberInfo(searchMember);
+			return 1;
+		default:
+			return 0;
+		}
+
+
+
+		cout << "Successfully Resert the members !" << endl;
 		return 1;
 	case 7:
 		system("cls");			//ÇåÆÁ
